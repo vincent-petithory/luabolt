@@ -6,13 +6,13 @@ import (
 )
 
 func init() {
-	registerMetaTable(lmtBucket, bucketFuncs)
+	registerMetaTable(TypeBucket, bucketFuncs)
 }
 
 var bucketFuncs = []lua.RegistryFunction{
 	{
 		"__index", func(l *lua.State) int {
-			bucket := lua.CheckUserData(l, 1, lmtBucket).(*bolt.Bucket)
+			bucket := lua.CheckUserData(l, 1, TypeBucket).(*bolt.Bucket)
 			switch k := lua.CheckString(l, 2); k {
 			case "fill_percent":
 				l.PushNumber(bucket.FillPercent)
@@ -24,7 +24,7 @@ var bucketFuncs = []lua.RegistryFunction{
 						l.PushNil()
 					} else {
 						l.PushUserData(b)
-						lua.SetMetaTableNamed(l, lmtBucket)
+						lua.SetMetaTableNamed(l, TypeBucket)
 					}
 					return 1
 				})
@@ -37,7 +37,7 @@ var bucketFuncs = []lua.RegistryFunction{
 						panic("unreachable")
 					}
 					l.PushUserData(b)
-					lua.SetMetaTableNamed(l, lmtBucket)
+					lua.SetMetaTableNamed(l, TypeBucket)
 					return 1
 				})
 			case "create_bucket_if_not_exists":
@@ -49,14 +49,14 @@ var bucketFuncs = []lua.RegistryFunction{
 						panic("unreachable")
 					}
 					l.PushUserData(b)
-					lua.SetMetaTableNamed(l, lmtBucket)
+					lua.SetMetaTableNamed(l, TypeBucket)
 					return 1
 				})
 			case "cursor":
 				l.PushGoFunction(func(l *lua.State) int {
 					c := bucket.Cursor()
 					l.PushUserData(c)
-					lua.SetMetaTableNamed(l, lmtCursor)
+					lua.SetMetaTableNamed(l, TypeCursor)
 					return 1
 				})
 			case "delete":
@@ -145,14 +145,14 @@ var bucketFuncs = []lua.RegistryFunction{
 				l.PushGoFunction(func(l *lua.State) int {
 					stats := bucket.Stats()
 					l.PushUserData(&stats)
-					lua.SetMetaTableNamed(l, lmtBucketStats)
+					lua.SetMetaTableNamed(l, TypeBucketStats)
 					return 1
 				})
 			case "tx":
 				l.PushGoFunction(func(l *lua.State) int {
 					tx := bucket.Tx()
 					l.PushUserData(&tx)
-					lua.SetMetaTableNamed(l, lmtTx)
+					lua.SetMetaTableNamed(l, TypeTx)
 					return 1
 				})
 			case "writable":
@@ -170,7 +170,7 @@ var bucketFuncs = []lua.RegistryFunction{
 	},
 	{
 		"__newindex", func(l *lua.State) int {
-			bucket := lua.CheckUserData(l, 1, lmtBucket).(*bolt.Bucket)
+			bucket := lua.CheckUserData(l, 1, TypeBucket).(*bolt.Bucket)
 			switch k := lua.CheckString(l, 2); k {
 			case "fill_percent":
 				bucket.FillPercent = lua.CheckNumber(l, 3)

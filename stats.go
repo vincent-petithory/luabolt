@@ -6,13 +6,13 @@ import (
 )
 
 func init() {
-	registerMetaTable(lmtStats, statsFuncs)
+	registerMetaTable(TypeStats, statsFuncs)
 }
 
 var statsFuncs = []lua.RegistryFunction{
 	{
 		"__index", func(l *lua.State) int {
-			stats := lua.CheckUserData(l, 1, lmtStats).(*bolt.Stats)
+			stats := lua.CheckUserData(l, 1, TypeStats).(*bolt.Stats)
 			switch k := lua.CheckString(l, 2); k {
 			case "free_page_n":
 				l.PushInteger(stats.FreePageN)
@@ -28,13 +28,13 @@ var statsFuncs = []lua.RegistryFunction{
 				l.PushInteger(stats.OpenTxN)
 			case "tx_stats":
 				l.PushUserData(&stats.TxStats)
-				lua.SetMetaTableNamed(l, lmtTxStats)
+				lua.SetMetaTableNamed(l, TypeTxStats)
 			case "sub":
 				l.PushGoFunction(func(l *lua.State) int {
-					other := lua.CheckUserData(l, 1, lmtStats).(*bolt.Stats)
+					other := lua.CheckUserData(l, 1, TypeStats).(*bolt.Stats)
 					sub := stats.Sub(other)
 					l.PushUserData(&sub)
-					lua.SetMetaTableNamed(l, lmtStats)
+					lua.SetMetaTableNamed(l, TypeStats)
 					return 1
 				})
 			default:
@@ -46,7 +46,7 @@ var statsFuncs = []lua.RegistryFunction{
 	},
 	{
 		"__newindex", func(l *lua.State) int {
-			stats := lua.CheckUserData(l, 1, lmtStats).(*bolt.Stats)
+			stats := lua.CheckUserData(l, 1, TypeStats).(*bolt.Stats)
 			switch k := lua.CheckString(l, 2); k {
 			case "free_page_n":
 				stats.FreePageN = lua.CheckInteger(l, 3)
@@ -61,7 +61,7 @@ var statsFuncs = []lua.RegistryFunction{
 			case "open_tx_n":
 				stats.OpenTxN = lua.CheckInteger(l, 3)
 			case "tx_stats":
-				txStats := lua.CheckUserData(l, 1, lmtDB).(*bolt.TxStats)
+				txStats := lua.CheckUserData(l, 1, TypeDB).(*bolt.TxStats)
 				stats.TxStats = *txStats
 			default:
 				lua.Errorf(l, "bolt: unknown Stats.%s", k)

@@ -34,16 +34,16 @@ func Open(l *lua.State) {
 }
 
 const (
-	lmtBucket      = "github.com/boltdb/bolt.Bucket"
-	lmtBucketStats = "github.com/boltdb/bolt.BucketStats"
-	lmtCursor      = "github.com/boltdb/bolt.Cursor"
-	lmtDB          = "github.com/boltdb/bolt.DB"
-	lmtInfo        = "github.com/boltdb/bolt.Info"
-	lmtOptions     = "github.com/boltdb/bolt.Options"
-	lmtPageInfo    = "github.com/boltdb/bolt.PageInfo"
-	lmtStats       = "github.com/boltdb/bolt.Stats"
-	lmtTx          = "github.com/boltdb/bolt.Tx"
-	lmtTxStats     = "github.com/boltdb/bolt.TxStats"
+	TypeBucket      = "github.com/boltdb/bolt.Bucket"
+	TypeBucketStats = "github.com/boltdb/bolt.BucketStats"
+	TypeCursor      = "github.com/boltdb/bolt.Cursor"
+	TypeDB          = "github.com/boltdb/bolt.DB"
+	TypeInfo        = "github.com/boltdb/bolt.Info"
+	TypeOptions     = "github.com/boltdb/bolt.Options"
+	TypePageInfo    = "github.com/boltdb/bolt.PageInfo"
+	TypeStats       = "github.com/boltdb/bolt.Stats"
+	TypeTx          = "github.com/boltdb/bolt.Tx"
+	TypeTxStats     = "github.com/boltdb/bolt.TxStats"
 )
 
 var boltOpen = func(l *lua.State) int {
@@ -51,7 +51,7 @@ var boltOpen = func(l *lua.State) int {
 	mode := lua.CheckUnsigned(l, 2)
 	var options *bolt.Options
 	if l.Top() > 2 && !l.IsNil(3) {
-		options = lua.CheckUserData(l, 3, lmtOptions).(*bolt.Options)
+		options = lua.CheckUserData(l, 3, TypeOptions).(*bolt.Options)
 	}
 	db, err := bolt.Open(path, os.FileMode(mode), options)
 	if err != nil {
@@ -59,7 +59,7 @@ var boltOpen = func(l *lua.State) int {
 		panic("unreachable")
 	}
 	l.PushUserData(db)
-	lua.SetMetaTableNamed(l, lmtDB)
+	lua.SetMetaTableNamed(l, TypeDB)
 	return 1
 }
 
@@ -88,7 +88,16 @@ func PushDB(l *lua.State, db *bolt.DB, varName string) {
 		panic("db is nil")
 	}
 	l.PushUserData(db)
-	lua.SetMetaTableNamed(l, lmtDB)
+	lua.SetMetaTableNamed(l, TypeDB)
+	l.SetGlobal(varName)
+}
+
+func PushTx(l *lua.State, tx *bolt.Tx, varName string) {
+	if tx == nil {
+		panic("tx is nil")
+	}
+	l.PushUserData(tx)
+	lua.SetMetaTableNamed(l, TypeTx)
 	l.SetGlobal(varName)
 }
 

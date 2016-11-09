@@ -6,13 +6,13 @@ import (
 )
 
 func init() {
-	registerMetaTable(lmtInfo, infoFuncs)
+	registerMetaTable(TypeInfo, infoFuncs)
 }
 
 var infoFuncs = []lua.RegistryFunction{
 	{
 		"__index", func(l *lua.State) int {
-			info := lua.CheckUserData(l, 1, lmtInfo).(*bolt.Info)
+			info := lua.CheckUserData(l, 1, TypeInfo).(*bolt.Info)
 			switch k := lua.CheckString(l, 2); k {
 			case "data":
 				l.PushUnsigned(uint(info.Data))
@@ -27,7 +27,7 @@ var infoFuncs = []lua.RegistryFunction{
 	},
 	{
 		"__newindex", func(l *lua.State) int {
-			info := lua.CheckUserData(l, 1, lmtInfo).(*bolt.Info)
+			info := lua.CheckUserData(l, 1, TypeInfo).(*bolt.Info)
 			switch k := lua.CheckString(l, 2); k {
 			case "data":
 				info.Data = uintptr(lua.CheckUnsigned(l, 3))

@@ -6,13 +6,13 @@ import (
 )
 
 func init() {
-	registerMetaTable(lmtPageInfo, pageInfoFuncs)
+	registerMetaTable(TypePageInfo, pageInfoFuncs)
 }
 
 var pageInfoFuncs = []lua.RegistryFunction{
 	{
 		"__index", func(l *lua.State) int {
-			pageInfo := lua.CheckUserData(l, 1, lmtPageInfo).(*bolt.PageInfo)
+			pageInfo := lua.CheckUserData(l, 1, TypePageInfo).(*bolt.PageInfo)
 			switch k := lua.CheckString(l, 2); k {
 			case "id":
 				l.PushInteger(pageInfo.ID)
@@ -31,7 +31,7 @@ var pageInfoFuncs = []lua.RegistryFunction{
 	},
 	{
 		"__newindex", func(l *lua.State) int {
-			pageInfo := lua.CheckUserData(l, 1, lmtPageInfo).(*bolt.PageInfo)
+			pageInfo := lua.CheckUserData(l, 1, TypePageInfo).(*bolt.PageInfo)
 			switch k := lua.CheckString(l, 2); k {
 			case "id":
 				pageInfo.ID = lua.CheckInteger(l, 3)

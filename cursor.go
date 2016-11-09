@@ -6,19 +6,19 @@ import (
 )
 
 func init() {
-	registerMetaTable(lmtCursor, cursorFuncs)
+	registerMetaTable(TypeCursor, cursorFuncs)
 }
 
 var cursorFuncs = []lua.RegistryFunction{
 	{
 		"__index", func(l *lua.State) int {
-			cursor := lua.CheckUserData(l, 1, lmtCursor).(*bolt.Cursor)
+			cursor := lua.CheckUserData(l, 1, TypeCursor).(*bolt.Cursor)
 			switch k := lua.CheckString(l, 2); k {
 			case "bucket":
 				l.PushGoFunction(func(l *lua.State) int {
 					b := cursor.Bucket()
 					l.PushUserData(b)
-					lua.SetMetaTableNamed(l, lmtBucket)
+					lua.SetMetaTableNamed(l, TypeBucket)
 					return 1
 				})
 			case "delete":

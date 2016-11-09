@@ -8,13 +8,13 @@ import (
 )
 
 func init() {
-	registerMetaTable(lmtOptions, optionsFuncs)
+	registerMetaTable(TypeOptions, optionsFuncs)
 }
 
 var optionsFuncs = []lua.RegistryFunction{
 	{
 		"__index", func(l *lua.State) int {
-			options := lua.CheckUserData(l, 1, lmtOptions).(*bolt.Options)
+			options := lua.CheckUserData(l, 1, TypeOptions).(*bolt.Options)
 			switch k := lua.CheckString(l, 2); k {
 			case "timeout":
 				l.PushString(options.Timeout.String())
@@ -33,7 +33,7 @@ var optionsFuncs = []lua.RegistryFunction{
 	},
 	{
 		"__newindex", func(l *lua.State) int {
-			options := lua.CheckUserData(l, 1, lmtOptions).(*bolt.Options)
+			options := lua.CheckUserData(l, 1, TypeOptions).(*bolt.Options)
 			switch k := lua.CheckString(l, 2); k {
 			case "timeout":
 				d, err := time.ParseDuration(lua.CheckString(l, 3))

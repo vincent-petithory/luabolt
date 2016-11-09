@@ -8,13 +8,13 @@ import (
 )
 
 func init() {
-	registerMetaTable(lmtTxStats, txStatsFuncs)
+	registerMetaTable(TypeTxStats, txStatsFuncs)
 }
 
 var txStatsFuncs = []lua.RegistryFunction{
 	{
 		"__index", func(l *lua.State) int {
-			txStats := lua.CheckUserData(l, 1, lmtTxStats).(*bolt.TxStats)
+			txStats := lua.CheckUserData(l, 1, TypeTxStats).(*bolt.TxStats)
 			switch k := lua.CheckString(l, 2); k {
 			case "page_count":
 				l.PushInteger(txStats.PageCount)
@@ -42,10 +42,10 @@ var txStatsFuncs = []lua.RegistryFunction{
 				l.PushString(txStats.WriteTime.String())
 			case "sub":
 				l.PushGoFunction(func(l *lua.State) int {
-					other := lua.CheckUserData(l, 1, lmtTxStats).(*bolt.TxStats)
+					other := lua.CheckUserData(l, 1, TypeTxStats).(*bolt.TxStats)
 					sub := txStats.Sub(other)
 					l.PushUserData(&sub)
-					lua.SetMetaTableNamed(l, lmtTxStats)
+					lua.SetMetaTableNamed(l, TypeTxStats)
 					return 1
 				})
 			default:
@@ -57,7 +57,7 @@ var txStatsFuncs = []lua.RegistryFunction{
 	},
 	{
 		"__newindex", func(l *lua.State) int {
-			txStats := lua.CheckUserData(l, 1, lmtTxStats).(*bolt.TxStats)
+			txStats := lua.CheckUserData(l, 1, TypeTxStats).(*bolt.TxStats)
 			switch k := lua.CheckString(l, 2); k {
 			case "page_count":
 				txStats.PageCount = lua.CheckInteger(l, 3)

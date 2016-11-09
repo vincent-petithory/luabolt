@@ -6,13 +6,13 @@ import (
 )
 
 func init() {
-	registerMetaTable(lmtTx, txFuncs)
+	registerMetaTable(TypeTx, txFuncs)
 }
 
 var txFuncs = []lua.RegistryFunction{
 	{
 		"__index", func(l *lua.State) int {
-			tx := lua.CheckUserData(l, 1, lmtTx).(*bolt.Tx)
+			tx := lua.CheckUserData(l, 1, TypeTx).(*bolt.Tx)
 			switch k := lua.CheckString(l, 2); k {
 			case "write_flag":
 				l.PushInteger(tx.WriteFlag)
@@ -24,7 +24,7 @@ var txFuncs = []lua.RegistryFunction{
 						l.PushNil()
 					} else {
 						l.PushUserData(b)
-						lua.SetMetaTableNamed(l, lmtBucket)
+						lua.SetMetaTableNamed(l, TypeBucket)
 					}
 					return 1
 				})
@@ -60,7 +60,7 @@ var txFuncs = []lua.RegistryFunction{
 						panic("unreachable")
 					}
 					l.PushUserData(b)
-					lua.SetMetaTableNamed(l, lmtBucket)
+					lua.SetMetaTableNamed(l, TypeBucket)
 					return 1
 				})
 			case "create_bucket_if_not_exists":
@@ -72,21 +72,21 @@ var txFuncs = []lua.RegistryFunction{
 						panic("unreachable")
 					}
 					l.PushUserData(b)
-					lua.SetMetaTableNamed(l, lmtBucket)
+					lua.SetMetaTableNamed(l, TypeBucket)
 					return 1
 				})
 			case "cursor":
 				l.PushGoFunction(func(l *lua.State) int {
 					c := tx.Cursor()
 					l.PushUserData(c)
-					lua.SetMetaTableNamed(l, lmtCursor)
+					lua.SetMetaTableNamed(l, TypeCursor)
 					return 1
 				})
 			case "db":
 				l.PushGoFunction(func(l *lua.State) int {
 					db := tx.DB()
 					l.PushUserData(db)
-					lua.SetMetaTableNamed(l, lmtDB)
+					lua.SetMetaTableNamed(l, TypeDB)
 					return 1
 				})
 			case "delete_bucket":
@@ -105,7 +105,7 @@ var txFuncs = []lua.RegistryFunction{
 						l.PushValue(1)
 						pushBytes(l, name)
 						l.PushUserData(b)
-						lua.SetMetaTableNamed(l, lmtBucket)
+						lua.SetMetaTableNamed(l, TypeBucket)
 						l.Call(2, 0)
 						return nil
 					})
@@ -138,7 +138,7 @@ var txFuncs = []lua.RegistryFunction{
 						panic("unreachable")
 					}
 					l.PushUserData(pi)
-					lua.SetMetaTableNamed(l, lmtPageInfo)
+					lua.SetMetaTableNamed(l, TypePageInfo)
 					return 1
 				})
 			case "rollback":
@@ -159,7 +159,7 @@ var txFuncs = []lua.RegistryFunction{
 				l.PushGoFunction(func(l *lua.State) int {
 					stats := tx.Stats()
 					l.PushUserData(&stats)
-					lua.SetMetaTableNamed(l, lmtTxStats)
+					lua.SetMetaTableNamed(l, TypeTxStats)
 					return 1
 				})
 			case "writable":
@@ -177,7 +177,7 @@ var txFuncs = []lua.RegistryFunction{
 	},
 	{
 		"__newindex", func(l *lua.State) int {
-			tx := lua.CheckUserData(l, 1, lmtTx).(*bolt.Tx)
+			tx := lua.CheckUserData(l, 1, TypeTx).(*bolt.Tx)
 			switch k := lua.CheckString(l, 2); k {
 			case "write_flag":
 				tx.WriteFlag = lua.CheckInteger(l, 3)

@@ -6,13 +6,13 @@ import (
 )
 
 func init() {
-	registerMetaTable(lmtBucketStats, bucketStatsFuncs)
+	registerMetaTable(TypeBucketStats, bucketStatsFuncs)
 }
 
 var bucketStatsFuncs = []lua.RegistryFunction{
 	{
 		"__index", func(l *lua.State) int {
-			bucketStats := lua.CheckUserData(l, 1, lmtBucketStats).(*bolt.BucketStats)
+			bucketStats := lua.CheckUserData(l, 1, TypeBucketStats).(*bolt.BucketStats)
 			switch k := lua.CheckString(l, 2); k {
 			case "branch_page_n":
 				l.PushInteger(bucketStats.BranchPageN)
@@ -42,7 +42,7 @@ var bucketStatsFuncs = []lua.RegistryFunction{
 				l.PushInteger(bucketStats.InlineBucketInuse)
 			case "add":
 				l.PushGoFunction(func(l *lua.State) int {
-					other := lua.CheckUserData(l, 1, lmtBucketStats).(*bolt.BucketStats)
+					other := lua.CheckUserData(l, 1, TypeBucketStats).(*bolt.BucketStats)
 					bucketStats.Add(*other)
 					return 0
 				})
@@ -55,7 +55,7 @@ var bucketStatsFuncs = []lua.RegistryFunction{
 	},
 	{
 		"__newindex", func(l *lua.State) int {
-			bucketStats := lua.CheckUserData(l, 1, lmtBucketStats).(*bolt.BucketStats)
+			bucketStats := lua.CheckUserData(l, 1, TypeBucketStats).(*bolt.BucketStats)
 			switch k := lua.CheckString(l, 2); k {
 			case "branch_page_n":
 				bucketStats.BranchPageN = lua.CheckInteger(l, 3)

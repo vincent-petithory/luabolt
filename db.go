@@ -8,13 +8,13 @@ import (
 )
 
 func init() {
-	registerMetaTable(lmtDB, dbFuncs)
+	registerMetaTable(TypeDB, dbFuncs)
 }
 
 var dbFuncs = []lua.RegistryFunction{
 	{
 		"__index", func(l *lua.State) int {
-			db := lua.CheckUserData(l, 1, lmtDB).(*bolt.DB)
+			db := lua.CheckUserData(l, 1, TypeDB).(*bolt.DB)
 			switch k := lua.CheckString(l, 2); k {
 			case "strict_mode":
 				l.PushBoolean(db.StrictMode)
@@ -36,7 +36,7 @@ var dbFuncs = []lua.RegistryFunction{
 					err := db.Batch(func(tx *bolt.Tx) error {
 						l.PushValue(1)
 						l.PushUserData(tx)
-						lua.SetMetaTableNamed(l, lmtTx)
+						lua.SetMetaTableNamed(l, TypeTx)
 						l.Call(1, 0)
 						return nil
 					})
@@ -56,7 +56,7 @@ var dbFuncs = []lua.RegistryFunction{
 						panic("unreachable")
 					}
 					l.PushUserData(tx)
-					lua.SetMetaTableNamed(l, lmtTx)
+					lua.SetMetaTableNamed(l, TypeTx)
 					return 1
 				})
 			case "close":
@@ -75,7 +75,7 @@ var dbFuncs = []lua.RegistryFunction{
 			case "info":
 				l.PushGoFunction(func(l *lua.State) int {
 					l.PushUserData(db.Info())
-					lua.SetMetaTableNamed(l, lmtInfo)
+					lua.SetMetaTableNamed(l, TypeInfo)
 					return 1
 				})
 			case "is_read_only":
@@ -92,7 +92,7 @@ var dbFuncs = []lua.RegistryFunction{
 				l.PushGoFunction(func(l *lua.State) int {
 					stats := db.Stats()
 					l.PushUserData(&stats)
-					lua.SetMetaTableNamed(l, lmtStats)
+					lua.SetMetaTableNamed(l, TypeStats)
 					return 1
 				})
 			case "string":
@@ -113,7 +113,7 @@ var dbFuncs = []lua.RegistryFunction{
 					lua.CheckType(l, 1, lua.TypeFunction)
 					err := db.Update(func(tx *bolt.Tx) error {
 						l.PushUserData(tx)
-						lua.SetMetaTableNamed(l, lmtTx)
+						lua.SetMetaTableNamed(l, TypeTx)
 						l.Call(1, 0)
 						return nil
 					})
@@ -128,7 +128,7 @@ var dbFuncs = []lua.RegistryFunction{
 					lua.CheckType(l, 1, lua.TypeFunction)
 					err := db.View(func(tx *bolt.Tx) error {
 						l.PushUserData(tx)
-						lua.SetMetaTableNamed(l, lmtTx)
+						lua.SetMetaTableNamed(l, TypeTx)
 						l.Call(1, 0)
 						return nil
 					})
@@ -147,7 +147,7 @@ var dbFuncs = []lua.RegistryFunction{
 	},
 	{
 		"__newindex", func(l *lua.State) int {
-			db := lua.CheckUserData(l, 1, lmtDB).(*bolt.DB)
+			db := lua.CheckUserData(l, 1, TypeDB).(*bolt.DB)
 			switch k := lua.CheckString(l, 2); k {
 			case "strict_mode":
 				lua.CheckType(l, 3, lua.TypeBoolean)
