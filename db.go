@@ -32,9 +32,9 @@ var dbFuncs = []lua.RegistryFunction{
 				l.PushInteger(db.AllocSize)
 			case "batch":
 				l.PushGoFunction(func(l *lua.State) int {
-					// TODO same problem than with for_each: will be called multiple times
 					lua.CheckType(l, 1, lua.TypeFunction)
 					err := db.Batch(func(tx *bolt.Tx) error {
+						l.PushValue(1)
 						l.PushUserData(tx)
 						lua.SetMetaTableNamed(l, lmtTx)
 						l.Call(1, 0)

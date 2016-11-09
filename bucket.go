@@ -79,7 +79,6 @@ var bucketFuncs = []lua.RegistryFunction{
 				})
 			case "for_each":
 				l.PushGoFunction(func(l *lua.State) int {
-					// TODO should we expose the inner error to lua?
 					lua.CheckType(l, 1, lua.TypeFunction)
 					err := bucket.ForEach(func(k, v []byte) error {
 						l.PushValue(1)
@@ -88,7 +87,6 @@ var bucketFuncs = []lua.RegistryFunction{
 						l.Call(2, 0)
 						return nil
 					})
-					l.Pop(1)
 					if err != nil {
 						lua.Errorf(l, err.Error())
 						panic("unreachable")

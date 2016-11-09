@@ -182,6 +182,30 @@ end)
 	}
 }
 
+func TestBatchView(t *testing.T) {
+	l, db, buf := setupLuaAndDB(t)
+	defer db.Close()
+	src := `local bolt = require("bolt")
+db.batch(function(tx)
+  b = tx.create_bucket("meow")
+  b.put("key", "value")
+end)
+
+db.view(function(tx)
+  b = tx.bucket("meow")
+  v = b.get("key")
+  fprintf("%s",v)
+end)
+`
+	if err := lua.DoString(l, src); err != nil {
+		t.Error(err)
+		return
+	}
+	if es := "value"; buf.String() != es {
+		t.Errorf("expected %s, got %s", es, buf.String())
+	}
+}
+
 func TestCursorForward(t *testing.T) {
 	l, db, buf := setupLuaAndDB(t)
 	defer db.Close()
@@ -406,11 +430,87 @@ end)
 }
 
 func TestTxRollback(t *testing.T) {
-	// make a writable tx, write something, generate an error, check something is not written
-	t.Fatal("not implemented")
+	l, db, buf := setupLuaAndDB(t)
+	defer db.Close()
+
+	var expectedBuf bytes.Buffer
+	fmt.Fprintln(&expectedBuf, "rollback")
+	fmt.Fprintln(&expectedBuf, "non-existing bucket")
+	src := `
+local bolt = require("bolt")
+
+ok, err = pcall(function()
+  db.update(function(tx)
+    tx.create_bucket("arrows")
+    error("forcing rollback")
+  end)
+end)
+
+if not ok then fprintf("rollback\n") end
+
+db.view(function(tx)
+  b = tx.bucket("arrows")
+  if not b then fprintf("non-existing bucket\n") end
+end)
+`
+	if err := lua.DoString(l, src); err != nil {
+		t.Error(err)
+		return
+	}
+	if buf.String() != expectedBuf.String() {
+		t.Errorf("expected:\n%s\ngot:\n%s", expectedBuf.String(), buf.String())
+	}
 }
 
 func TestDBManualTx(t *testing.T) {
-	// make a tx with db.begin(), commit / rollback
-	t.Fatal("not implemented")
+	l, db, _ := setupLuaAndDB(t)
+	defer db.Close()
+
+	src := `
+local bolt = require("bolt")
+
+tx = db.begin(true)
+if not tx.writable() then error() end
+b = tx.create_bucket("arrows")
+b.put("standard", "3")
+tx.commit()
+
+tx = db.begin(false)
+b = tx.bucket("arrows")
+c = b.get("standard")
+if c ~= "3" then error("not 3") end
+tx.rollback()
+`
+	if err := lua.DoString(l, src); err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func TestPCall(t *testing.T) {
+	l, db, buf := setupLuaAndDB(t)
+	defer db.Close()
+
+	var expectedBuf bytes.Buffer
+	fmt.Fprintln(&expectedBuf, "got expected error")
+	fmt.Fprintln(&expectedBuf, "got expected error msg")
+	src := `
+local bolt = require("bolt")
+
+db.update(function(tx)
+  b = tx.create_bucket("purrrr")
+  bb = b.create_bucket("cat")
+  -- trigger error
+  ok, err = pcall(function() b.put("cat", "meow") end)
+  if not ok then fprintf("got expected error\n") end
+  if string.find(err, "incompatible value") then fprintf("got expected error msg\n") end
+end)
+`
+	if err := lua.DoString(l, src); err != nil {
+		t.Error(err)
+		return
+	}
+	if buf.String() != expectedBuf.String() {
+		t.Errorf("expected:\n%s\ngot:\n%s", expectedBuf.String(), buf.String())
+	}
 }
